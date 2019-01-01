@@ -14,6 +14,9 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(120), unique=True, nullable=False)
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     password = db.Column(db.String(60), nullable=False)
+    introduction = db.Column(db.String(60), nullable=False, default='This person has not written yet.')
+    friend = db.Column(db.ARRAY(db.Integer), nullable=False, default=[])
+    black = db.Column(db.ARRAY(db.Integer), nullable=False, default=[])
     posts = db.relationship('Post', backref='author', lazy=True)
 
     def __repr__(self):
@@ -22,10 +25,28 @@ class User(db.Model, UserMixin):
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
+    title = db.Column(db.String(100), nullable=True)
+    image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     content = db.Column(db.Text, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    like = db.Column(db.ARRAY(db.Integer), nullable=False, default=[])
 
-    def __repr__(self):
-        return f"Post('{self.title}', '{self.date_posted}')"
+
+class Comment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    to_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    content = db.Column(db.Text, nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+class Fish(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    fishname = db.Column(db.String(50), unique=True, nullable=False)
+    image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
+    habitat = db.Column(db.Text, nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    fishing_date_from = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    fishing_date_to = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    endangered = db.Column(db.Boolean, nullable=False, default=False)
