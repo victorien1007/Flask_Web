@@ -5,15 +5,15 @@ code: 0 有错， 1 正常。
 http://127.0.0.1:5000/fishbook/api:
 
 #User
-/register debug
+/register fin
 注册
 json
 
-/login debug
+/login fin
 登录
 json
 
-/accout debug
+/accout fin
 账户信息
 
 /accout/<int:userid> debug
@@ -62,6 +62,12 @@ form-data
 
 /post/delete/<int:postid> debug
 删朋友圈，同时删除所有评论
+
+/like/<int:postid>
+赞
+
+/dislike/<int:postid>
+取消赞
 
 #Comment
 /comment/<int:commentid>
