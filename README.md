@@ -19,78 +19,84 @@ json
 /accout/<int:userid> debug
 好友的账户信息
 
-/update  debug
+/update  fin
 修改信息，可只提交修改项，pwd和confirm_pwd必须 填写 并 一致 才能修改密码
 form-data
 
 /logout  debug
 登出
 
-/myposts
+/myposts debug
 自己发的朋友圈
 
 /posts
-朋友圈（自己+好友）
+朋友圈（自己+好友） debug
 
-/posts/<int:userid>
+/posts/<int:userid> debug
 特定某个人的朋友圈
 必须是好友
 
-/friend/add/<int:userid>  debug
-用户添加朋友，双向添加
-在对方黑名单里会拒绝
+/friend/add/<int:userid>  fin
+发送申请用户添加朋友请求，双向添加
+在对方黑名单里会直接拒绝
 
-/friend/delete/<int:userid>  debug
+/application/<int:applicationid>/<int:way> debug
+接受（way=1）或拒绝(way=2)申请。
+
+/friend/delete/<int:userid>  fin
 删除朋友，双向
 
-/black/add/<int:userid>  debug
+/black/add/<int:userid>  fin
 添加到黑名单，自动删除好友
-/black/delete/<int:userid>  debug
+/black/delete/<int:userid>  fin
 从黑名单删除
 
 #Post
-/post/<int:postid> debug
+/post/<int:postid> fin
 查看某个朋友圈，和该的评论（自己或朋友）
 
-/post/new debug
+/post/new fin
 写朋友圈
 form-data
 
-/post/update/<int:postid> debug
+/post/update/<int:postid> fin
 修改，可只提交修改项
 form-data
 
-/post/delete/<int:postid> debug
+/post/delete/<int:postid> fin
 删朋友圈，同时删除所有评论
 
-/like/<int:postid>
+/like/<int:postid> dev
 赞
 
-/dislike/<int:postid>
+/dislike/<int:postid> dev
 取消赞
 
 #Comment
-/comment/<int:commentid>
 
-/comment/new/<int:postid>
+/comment/new/<int:postid> debug
 json
 
-/comment/update/<int:commentid>
+/comment/update/<int:commentid> debug
 只能改内容
 json
 
-/comment/delete/<int:commentid>
+/comment/delete/<int:commentid> debug
 
 #Fish
-/fish/<int:fishid>
+/fish/<int:fishid> dev
 
-/fish/new
+/fish/new dev
 form-data
 
-/fish/update/<int:fishid>
+/fish/update/<int:fishid> dev
 form-data
 
-/fish/delete/<int:fishid>
+/fish/delete/<int:fishid> dev
+
+/identification dev
+识别鱼
+form-data
 
 #调试用
 /up

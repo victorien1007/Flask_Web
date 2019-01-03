@@ -7,9 +7,8 @@ from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, jsonify
 from fishbook import app, db, bcrypt
 from fishbook.forms import RegistrationForm, LoginForm, UpdateAccountForm
-from fishbook.models import User, Post
+from fishbook.models import User, Post, Comment, Application, Fish, Notice, AlchemyEncoder
 from flask_login import login_user, current_user, logout_user, login_required
-
 url = 'http://127.0.0.1:5000'
 
 @app.route("/")
@@ -24,7 +23,7 @@ def check_friend(userid):
         if current_user.friend[i] == userid:
             return True
     return False
-def check_friend(userid,user):
+def check_infriend(user):
     i = len(user.friend)
     while i > 0:
         i -= 1
@@ -40,7 +39,7 @@ def check_black(userid):
             return True
     return False
 
-def check_black(userid, user):
+def check_inblack(user):
     i = len(user.black)
     while i > 0:
         i -= 1
@@ -68,16 +67,15 @@ def save_picture(picture, type): #1:profile;2:post;3:fish
     return picture_fn
 
 def delete_picture(picture, type):
-    if picture != 'default.jpg':
+    if (picture != 'default.jpg') and (picture is not None):
         if type == 1:
             picture_path = os.path.join(app.root_path, 'static/profile_pics', picture)
         elif type == 2:
             picture_path = os.path.join(app.root_path, 'static/post_pics', picture)
         elif type == 3:
             picture_path = os.path.join(app.root_path, 'static/fish_pics', picture)
-        else :
-            abort(403)
-        os.remove(os.path.join(picture_path))
+        if os.path.exists(picture_path):
+            os.remove(picture_path)
 
 
 @app.route("/fishbook/api/register", methods=['POST'])
@@ -110,7 +108,7 @@ def register():
 @app.route("/fishbook/api/login", methods=['POST'])
 def login():
     if current_user.is_authenticated:
-        return jsonify({'code': 0, 'message': 'you are already login.'})
+        return jsonify({'code': 0, 'message': 'you are success login.'})
     data = json.loads(request.get_data())
     email = data['email']
     password = data['password']
@@ -129,31 +127,48 @@ def logout():
     logout_user()
     return jsonify({'code': 1, 'message': 'You are logout'})
 
-
 @app.route("/fishbook/api/account", methods=['POST'])
 @login_required
 def account():
-    user=current_user
-    user={}
-    user['username'] = current_user.username
-    user['email'] = current_user.email
-    user['image_file'] = url_for('static', filename='profile_pics/' + current_user.image_file)
-    user['introduction']=current_user.introduction
+    user = current_user.to_json()
+    user['image_file'] = url_for('static', filename='profile_pics/' + user['image_file'])
+    del user['password']
+    applications=Application.filter_by(to_userid=current_user.id).all()
+    _applications={}
+    for application in applications:
+        a = application.to_json()
+        user =User.query.get_or_404(application.from_user)
+        a['content'] = user.username + 'apply to add you as a friend.'
+        _applications.append(a)
+
+    notices=Notice.filter_by(to_userid=current_user.id).all()
+    _notices={}
+    for notice in notice:
+        _notices.append(notice.to_json())
     data={}
     data['code']=1
-    data['current_user']=user
+    data['user']=user
+    data['applications']=_applications
+    data['notice']=_notices
     return jsonify(data)
 
 @app.route("/fishbook/api/account/<int:userid>", methods=['POST'])
 @login_required
-def account_friend():
+def account_friend(userid):
     user = User.query.filter_by(id=userid).first()
     if user is None:
         return jsonify({'code': 0, 'message': 'This user does not exist!'})
     if check_friend(user.id) is False:
         return jsonify({'code': 0, 'message': 'This user not your friend!'})
-    user.image_file = url_for(app.root_path, 'static', filename='profile_pics/' + user.image_file)
-    return jsonify({'code': 1, 'user': user})
+    #user.image_file = url_for(app.root_path, 'static', filename='profile_pics/' + user.image_file)
+    _user={}
+    _user['username'] = user.username
+    _user['image_file'] = url_for('static', filename='profile_pics/' + current_user.image_file)
+    _user['introduction'] = user.introduction
+    data={}
+    data['code']=1
+    data['user']=_user
+    return jsonify(data)
 
 @app.route("/fishbook/api/update", methods=['POST'])
 @login_required
@@ -164,22 +179,28 @@ def update():
     email = request.form.get('email', default=None)
     password = request.form.get('password', default=None)
     confirm_password = request.form.get('confirm_password', default=None)
+
     if image:
         picture_file = save_picture(image, 1)
         delete_picture(current_user.image_file, 1)
         current_user.image_file = picture_file
     if username:
+        user = User.query.filter_by(username=username).first()
+        if user:
+            return jsonify({'code': 0, 'message': 'That username is taken. Please choose a different one.'})
         current_user.username = username
     if email:
+        user = User.query.filter_by(email=email).first()
+        if user:
+            return jsonify({'code': 0, 'message': 'That email is taken. Please choose a different one.'})
         current_user.email = email
     if introduction:
         current_user.introduction = introduction
     if (password) and (confirm_password):
         if password != confirm_password:
             return jsonify({'code': 0, 'message': 'Inconsistent password entered twice.'})
-        else:
-            hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-            current_user.password = hashed_password
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+        current_user.password = hashed_password
     current_user.update_date = datetime.now()
     db.session.commit()
     flash('Your account has been updated!', 'success')
@@ -189,21 +210,55 @@ def update():
 @app.route("/fishbook/api/friend/add/<int:userid>", methods=['POST'])
 @login_required
 def addfriend(userid):
+    if current_user.id == userid :
+        return jsonify({'code': 0, 'message': 'You cannot add youself.'})
     user = User.query.filter_by(id=userid).first()
     if user is None:
-        return jsonify({'code': 0, 'message': 'This user does not exist'})
+        return jsonify({'code': 0, 'message': 'This user does not exist.'})
     if check_friend(userid):
-        return jsonify({'code': 0, 'message': 'Already in your friend list'})
-    if check_black(userid, user):
-        return jsonify({'code': 0, 'message': "You are in the user's blacklist"})
-    current_user.friend.append(userid)
-    user.friend.append(current_user.id)
+        return jsonify({'code': 0, 'message': 'Already in your friend list.'})
+    if check_inblack(user):
+        return jsonify({'code': 0, 'message': "You are in the user's blacklist."})
+
+    application = Application(from_user=current_user.id, to_user = user, type=1)
+    db.session.add(application)
+    notice = Notice(to_user = user.id, content = current_user.username + 'apply to add you as a friend.')
+    db.session.add(notice)
+    db.session.commit()
+    return jsonify({'code': 1, 'message': 'Add friend success'})
+
+@app.route("/fishbook/api/application/<int:applicationid>/<int:way>", methods=['POST'])
+@login_required
+def application(applicationid, way):
+    application = Application.query.filter_by(id=applicationid).first()
+    if application is None:
+        return jsonify({'code': 0, 'message': 'This application does not exist.'})
+    if application.to_user != current_user.id :
+        return jsonify({'code': 0, 'message': '.'})
+    if way == 1 :
+        notice1 = Notice(to_user = user.id, content = current_user.username + ' accepted your friend request.')
+        notice2 = Notice(to_user = current_user.id, content = 'You accepted '+ user.username + 's friend request.')
+        user = User.query.filter_by(id=application.from_user).first()
+        if user is None:
+            return jsonify({'code': 0, 'message': 'This user does not exist.'})
+        current_user.friend.append(user.id)
+        user.friend.append(current_user.id)
+    elif way == 2 :
+        notice1 = Notice(to_user = user.id, content = current_user.username + ' refuse your friend request.')
+        notice2 = Notice(to_user = current_user.id, content = 'You refuse '+ user.username + 's friend request.')
+    else :
+        return jsonify({'code': 0, 'message': 'Error.'})
+    db.session.delete(application)
+    db.session.add(notice1)
+    db.session.add(notice2)
     db.session.commit()
     return jsonify({'code': 1, 'message': 'Add friend success'})
 
 def delete(userid):
     user = User.query.filter_by(id=userid).first()
     if user:#
+        if not check_friend(user):
+            return False
         current_user.friend.remove(userid)
         user.friend.remove(current_user.id)
         db.session.commit()
@@ -219,12 +274,12 @@ def deletefriend(userid):
     else :
         return jsonify({'code': 0})
 
-
-
 @app.route("/fishbook/api/black/add/<int:userid>", methods=['POST'])
 @login_required
 def addblack(userid):
-    user = User.query.filter_by(email=email).first()
+    if current_user.id ==userid:
+        return jsonify({'code': 0, 'message': 'You cannot add youself.'})
+    user = User.query.filter_by(id=userid).first()
     if user is None:
         return jsonify({'code': 0, 'message': 'This user does not exist'})
     if check_black(userid):
@@ -241,24 +296,39 @@ def deleteblack(userid):
     user = User.query.filter_by(id=userid).first()
     if user is None:
         return jsonify({'code': 0, 'message': 'This user does not exist'})
+    if not check_black(userid):
+        return jsonify({'code': 0, 'message': 'This user are not in your blacklist'})
     current_user.black.remove(userid)
     db.session.commit()
     return jsonify({'code': 1, 'message': 'Delete from blacklist success'})
 
-@app.route("/post/<int:postid>")
+
+@app.route("/fishbook/api/post/<int:postid>", methods=['POST'])
+@login_required
 def post(postid):
     post = Post.query.get_or_404(postid)
-    comment = Comment.query.filter_by(pots_id=postid).first()
-    comment.image_file = url_for('static', filename='post_pics/' + comment.image_file)
-    return jsonify({'code': 1, 'post': post, 'comment': comment})
+    _post=post.to_json()
+
+    comments = Comment.query.filter_by(post_id=postid).all()
+    _comment={}
+    for comment in comments:
+        _comment.append(comment.to_json())
+    data={}
+    data['code'] = 1
+    data['post'] = _post
+    data['comment'] = _comment
+
+
+    return jsonify(data)
 
 @app.route("/fishbook/api/post/new", methods=['POST'])
 @login_required
 def newpost():
-    title = request.form['title']
-    image = request.file['image']
-    content = request.form['content']
-    user_id = current_user.id
+    title = request.form.get('title', default=None)
+    image = request.files.get('image', default=None)
+    content = request.form.get('content', default=None)
+    if not content:
+        return jsonify({'code': 0, 'message': 'no content!'})
     post = Post(content=content, user_id = current_user.id)
     if title:
         post.title=title
@@ -271,13 +341,13 @@ def newpost():
 
 @app.route("/fishbook/api/post/update/<int:postid>", methods=['POST'])
 @login_required
-def updatepost(post_id):
-    post = Post.query.get_or_404(post_id)
-    if post.user_id != current_user:
-        abort(403)
-    title = request.form['title']
-    image = request.file['image']
-    content = request.form['image']
+def updatepost(postid):
+    post = Post.query.get_or_404(postid)
+    if post.user_id != current_user.id:
+        return jsonify({'code': 0, 'message': 'You are not author!'})
+    title = request.form.get('title', default=None)
+    image = request.files.get('image', default=None)
+    content = request.form.get('content', default=None)
     if title:
         post.title = title
     if content:
@@ -286,30 +356,186 @@ def updatepost(post_id):
         picture_file = save_picture(image, 2)
         delete_picture(post.image_file, 2)
         post.image_file = picture_file
-    post.update_date = datetime.utcnow
+    post.update_date = datetime.now()
     db.session.commit()
     return jsonify({'code': 1, 'message': 'Your post has been updated!'})
 
 
 @app.route("/fishbook/api/post/delete/<int:postid>", methods=['POST'])
 @login_required
-def delete_post(postid):
+def deletepost(postid):
     post = Post.query.get_or_404(postid)
-    if post.user_id != current_user:
-        abort(403)
-    comments = Comment.query.filter_by(pots_id=postid).all()
+    if post.user_id != current_user.id:
+        return jsonify({'code': 0, 'message': 'You are not the author!'})
+    comments = Comment.query.filter_by(post_id=postid).delete(synchronize_session=False)
+    delete_picture(post.image_file, 2)
     db.session.delete(post)
-    db.session.delete(comments)
+    #db.session.delete(comments)
     db.session.commit()
     return jsonify({'code': 1, 'message': 'Your post has been deleted!'})
 
 
+@app.route("/fishbook/api/comment/new/<int:postid>", methods=['POST'])
+@login_required
+def newcomment(postid):
+    post = Post.query.get_or_404(postid)
+    if not post:
+        return jsonify({'code': 0, 'message': '!'})
+    data = json.loads(request.get_data())
+    content = data['content']
+    to_user_id = data['touser']
+    comment = comment(content=content, user_id = current_user.id, post_id = postid)
+    if to_user_id:
+        comment.to_user_id=to_user_id
+    notice= Notice(to_user = post.user_id, content = current_user.username +'commented on your post.')
+    db.session.add(comment)
+    db.session.commit()
+    return jsonify({'code': 1, 'message': 'Your comment has been created!'})
 
-@app.route("/list")
-def list():
-    #Users=User.query.filter_by(username='wangyi').all()
-    print('User :',Users)
-    return redirect(url_for('home'))
+@app.route("/fishbook/api/comment/update/<int:commentid>", methods=['POST'])
+@login_required
+def updatecomment(commentid):
+    comment = Comment.query.get_or_404(commentid)
+    if comment.user_id != current_user.id:
+        return jsonify({'code': 0, 'message': 'You are not the author!'})
+    data = json.loads(request.get_data())
+    content = data['content']
+    if content:
+        comment.content = content
+        comment.update_date = datetime.now()
+        db.session.commit()
+        return jsonify({'code': 1, 'message': 'Your comment has been updated!'})
+
+@app.route("/fishbook/api/comment/delete/<int:commentid>", methods=['POST'])
+@login_required
+def deletecomment(commentid):
+    comment = Comment.query.get_or_404(commentid)
+    if post.user_id != current_user.id:
+        return jsonify({'code': 0, 'message': 'You are not the author!'})
+    db.session.delete(comment)
+    db.session.commit()
+    return jsonify({'code': 1, 'message': 'Your comment has been deleted!'})
+
+@app.route("/fishbook/api/myposts")
+@login_required
+def myposts():
+    posts = Post.query.filter_by(user_id=current_user.id).all()
+    _posts={}
+    for post in posts:
+        _posts.apprend(post.to_json())
+    data={}
+    data['code'] = 1
+    data['posts'] = _posts
+    return jsonify(data)
+
+@app.route("/fishbook/api/posts")
+@login_required
+def posts():
+    _posts={}
+    for user in current_user.friend:
+        posts = Post.query.filter_by(user_id=user).all()
+        for post in posts:
+            _posts.apprend(post.to_json())
+    posts = Post.query.filter_by(user_id=current_user.id).all()
+    for post in posts:
+        _posts.apprend(post.to_json())
+    _posts.sort(key=lambda x: x['create_date'], reverse=True)
+    data['code'] = 1
+    data['posts'] = _posts
+    return jsonify(data)
+
+@app.route("/fishbook/api/posts/<int:userid>")
+@login_required
+def userposts(userid):
+    user = User.query.filter_by(id=userid).first()
+    if not user:
+        return jsonify({'code':0})
+    if not check_friend(userid):
+        return jsonify({'code':0})
+    posts = Post.query.filter_by(user_id=userid).all()
+    _posts={}
+    for post in posts:
+        _posts.apprend(post.to_json())
+    data={}
+    data['code'] = 1
+    data['posts'] = _posts
+    return jsonify(data)
+
+@app.route("/fishbook/api/fish/<int:fishid>")
+@login_required
+def fish(fishid):
+    post = Post.query.get_or_404(postid)
+    comment = Comment.query.filter_by(pots_id=postid).first()
+    comment.image_file = url_for('static', filename='fish_pics/' + comment.image_file)
+    return jsonify({'code': 1, 'post': post, 'comment': comment})
+
+@app.route("/fishbook/api/fish/new", methods=['POST'])
+@login_required
+def newfish():
+    if not current_user.admin:
+        return jsonify({'code': 0, 'message': 'No permission!'})
+    title = request.form['title']
+    image = request.file['image']
+    content = request.form['content']
+    user_id = current_user.id
+    post = Post(content=content, user_id = current_user.id)
+    if title:
+        post.title=title
+    if image:
+        picture_file = save_picture(image, 3)
+        post.image_file = picture_file
+    db.session.add(post)
+    db.session.commit()
+    return jsonify({'code': 1, 'message': 'Your post has been created!'})
+
+@app.route("/fishbook/api/fish/update/<int:fishid>", methods=['POST'])
+@login_required
+def updatefish(fishid):
+    if not current_user.admin:
+        return jsonify({'code': 0, 'message': 'No permission!'})
+    fish = Fish.query.get_or_404(fishid)
+
+    title = request.form['title']
+    image = request.file['image']
+    content = request.form['content']
+    if title:
+        post.title = title
+    if content:
+        post.content = content
+    if image:
+        picture_file = save_picture(image, 3)
+        delete_picture(fish.image_file, 3)
+        fish.image_file = picture_file
+    fish.update_date = datetime.now()
+    db.session.commit()
+    return jsonify({'code': 1, 'message': 'Your post has been updated!'})
+
+
+@app.route("/fishbook/api/fish/delete/<int:fishid>", methods=['POST'])
+@login_required
+def deletefish(fishid):
+    if not current_user.admin:
+        return jsonify({'code': 0, 'message': 'No permission!'})
+    fish = Fish.query.get_or_404(fishid)
+
+    delete_picture(fish.image_file, 3)
+    db.session.delete(fish)
+    db.session.commit()
+    return jsonify({'code': 1, 'message': 'Fish data has been deleted!'})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 @app.route("/up")
 def up():
@@ -321,18 +547,3 @@ def uploadiamge():
 
     file = request.files['filechoose']
     file.save(os.path.dirname(__file__) + '/images/test.jpg')
-    return use_detect_api()
-
-def use_detect_api():
-    module_path = os.path.dirname(__file__)
-    f = open(module_path + '/images/test.jpg', 'rb')#如果不加b，则会报转码错误
-    file = {'image': f}
-
-    #r 是个response对象
-    r = requests.post(url + '/detect', files=file)
-    #print(type(r.text)) #str
-    resJson = json.loads(r.text)
-    #print(type(resJson)) #dict
-    #1.会将内容转换为json，
-    #2.修改Content-Type为application/json。
-    return jsonify(resJson)
