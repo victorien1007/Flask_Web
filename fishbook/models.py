@@ -104,12 +104,11 @@ class Comment(db.Model):
 
 class Fish(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    fishname = db.Column(db.String(50), unique=True, nullable=False)
+    name = db.Column(db.String(50), unique=True, nullable=False)
     image_file = db.Column(db.String(40), nullable=False, default='default.jpg')
-    habitat = db.Column(db.Text, nullable=False)
-    description = db.Column(db.Text, nullable=False)
-    fishing_date_from = db.Column(db.DateTime, nullable=False, default=datetime.now())
-    fishing_date_to = db.Column(db.DateTime, nullable=False, default=datetime.now())
+    habitat = db.Column(db.Text, nullable=False,default='need update')
+    description = db.Column(db.Text, nullable=False,default='need update')
+    fishing_date = db.Column(db.Text, nullable=False, default='need update')
     endangered = db.Column(db.Boolean, nullable=False, default=False)
     create_date = db.Column(db.DateTime, nullable=False, default=datetime.now())
     update_date = db.Column(db.DateTime, nullable=False, default=datetime.now())

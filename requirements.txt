@@ -1,0 +1,11 @@
+flask
+flask_bcrypt
+flask_login
+flask_sqlalchemy
+flask_wtf
+WTForms
+Pillow
+keras
+numpy
+matplotlib
+psycopg2
