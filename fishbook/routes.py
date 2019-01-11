@@ -134,11 +134,23 @@ def account():
     user = current_user.to_json()
     user['image_file'] = url_for('static', filename='profile_pics/' + user['image_file'])
     del user['password']
+    friend_list=[]
+    for uid in user['friend']:
+        u = User.query.get_or_404(uid)
+        friend_list.append({uid:u.username})
+    user['friend']=friend_list
+
+    black_list=[]
+    for uid in user['black']:
+        u = User.query.get_or_404(uid)
+        black_list.append({uid:u.username})
+    user['black']=black_list
+
     applications=Application.query.filter_by(to_user=current_user.id).all()
     _applications=[]
     for application in applications:
         a = application.to_json()
-        u =User.query.get_or_404(application.from_user)
+        u = User.query.get_or_404(application.from_user)
         a['content'] = u.username + 'apply to add you as a friend.'
         _applications.append(a)
 
@@ -496,25 +508,42 @@ def userposts(userid):
     data['posts'] = _posts
     return jsonify(data)
 
+@app.route("/fishbook/api/fish/list", methods=['POST'])
+@login_required
+def fishlist():
+    fishs = Fish.query.all()
+    _fish=[]
+    for fish in fishs:
+        fish =fish.to_json()
+        fish['image_file'] = url_for('static', filename='fish_pics/' + fish['image_file'])
+        _fish.append(fish)
+    data={}
+    data['code'] = 1
+    data['fishs'] = _fish
+    return jsonify({'code': 1, 'fish': _fish})
+
 @app.route("/fishbook/api/fish/<int:fishid>", methods=['POST'])
 @login_required
 def fish(fishid):
     fish = Fish.query.get_or_404(fishid)
     fish = fish.to_json()
-    fish.image_file = url_for('static', filename='fish_pics/' + fish.image_file)
+    fish['image_file'] = url_for('static', filename='fish_pics/' + fish['image_file'])
     return jsonify({'code': 1, 'fish': fish})
+
 
 @app.route("/fishbook/api/fish/new", methods=['POST'])
 @login_required
 def newfish():
     if not current_user.admin:
         return jsonify({'code': 0, 'message': 'No permission!'})
-    name = request.form.get('name')
+    name = request.form.get('name', default=None)
     image = request.files.get('image', default=None)
     habitat = request.form.get('habitat', default=None)
     description = request.form.get('description', default=None)
     fishing_date = request.form.get('fishing_date', default=None)
     endangered = request.form.get('endangered', default=None)#1 true / 2 false
+    if not name:
+        return jsonify({'code': 0, 'message': 'Error!'})
     fish = Fish(name=name)
     if habitat:
         fish.habitat=habitat
@@ -531,7 +560,7 @@ def newfish():
         post.image_file = picture_file
     db.session.add(fish)
     db.session.commit()
-    return jsonify({'code': 1, 'message': 'Your post has been created!'})
+    return jsonify({'code': 1, 'message': 'A new kind of fish has been created!'})
 
 @app.route("/fishbook/api/fish/update/<int:fishid>", methods=['POST'])
 @login_required
@@ -584,11 +613,15 @@ def identification():
     i = Image.open(image)
     i.save(picture_path)
 
-
-
     im=load_image(picture_path)
-    str=fish_identification(im)
-    return jsonify({'code': 1, 'message':str})
+    res=fish_identification(im)
+    fish=Fish.query.filter_by(name=res).first()
+    data={}
+    data['code'] = 1
+    fish = fish.to_json()
+    fish['image_file'] = url_for('static', filename='fish_pics/' + fish['image_file'])
+    data['result_fish'] = fish
+    return jsonify(data)
 
 
 

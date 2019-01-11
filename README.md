@@ -122,7 +122,9 @@ form-data
 
 /fish/delete/<int:fishid> fin
 
-/identification dev
+/fish/list fin
+
+/identification fin
 识别鱼
 form-data
 
@@ -134,5 +136,6 @@ form-data
 /allfish
 
 关注
+添加follow 修改usermodel,
 用户设置查看动态
 所有人都点赞
