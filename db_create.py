@@ -1,13 +1,13 @@
-from fishbook.models import User, Post, Comment, Application, Fish, Notice, AlchemyEncoder
+from fishbook.models import User, Post, Comment, Fish, Notice, AlchemyEncoder
 from fishbook import db, bcrypt
 db.drop_all()
 db.create_all()
 password='123456'
 hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-user1 = User(username='wangyi1', email='wangyi1@mail.com', password=hashed_password,admin=True,friend=[2,3,4],black=[5])
-user2 = User(username='wangyi2', email='wangyi2@mail.com', password=hashed_password,friend=[1])
-user3 = User(username='wangyi3', email='wangyi3@mail.com', password=hashed_password,friend=[1])
-user4 = User(username='wangyi4', email='wangyi4@mail.com', password=hashed_password,friend=[1])
+user1 = User(username='wangyi1', email='wangyi1@mail.com', password=hashed_password,admin=True,follow=[2,3,4],black=[5])
+user2 = User(username='wangyi2', email='wangyi2@mail.com', password=hashed_password,follow=[1])
+user3 = User(username='wangyi3', email='wangyi3@mail.com', password=hashed_password,follow=[1])
+user4 = User(username='wangyi4', email='wangyi4@mail.com', password=hashed_password,follow=[1])
 user5 = User(username='wangyi5', email='wangyi5@mail.com', password=hashed_password)
 db.session.add(user1)
 db.session.add(user2)

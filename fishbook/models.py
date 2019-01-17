@@ -4,6 +4,7 @@ from flask_login import UserMixin
 from sqlalchemy.ext.mutable import Mutable
 import json
 from sqlalchemy.ext.declarative import DeclarativeMeta
+from sqlalchemy.dialects.postgresql import ARRAY
 
 class AlchemyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -59,8 +60,8 @@ class User(db.Model, UserMixin):
     image_file = db.Column(db.String(40), nullable=False, default='default.jpg')
     password = db.Column(db.String(60), nullable=False)
     introduction = db.Column(db.String(100), nullable=False, default='This person has not written yet.')
-    friend = db.Column(MutableList.as_mutable(db.ARRAY(db.Integer)), nullable=False, default=[])
-    black = db.Column(MutableList.as_mutable(db.ARRAY(db.Integer)), nullable=False, default=[])
+    follow = db.Column(MutableList.as_mutable(ARRAY(db.Integer)), nullable=False, default=[])
+    black = db.Column(MutableList.as_mutable(ARRAY(db.Integer)), nullable=False, default=[])
     create_date = db.Column(db.DateTime, nullable=False, default=datetime.now())
     update_date = db.Column(db.DateTime, nullable=False, default=datetime.now())
     admin = db.Column(db.Boolean, nullable=False, default=False)
@@ -79,7 +80,7 @@ class Post(db.Model):
     image_file = db.Column(db.String(40), nullable=True)
     content = db.Column(db.Text, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    like = db.Column(MutableList.as_mutable(db.ARRAY(db.Integer)), nullable=False, default=[])
+    like = db.Column(MutableList.as_mutable(ARRAY(db.Integer)), nullable=False, default=[])
     create_date = db.Column(db.DateTime, nullable=False, default=datetime.now())
     update_date = db.Column(db.DateTime, nullable=False, default=datetime.now())
     def to_json(self):
@@ -118,11 +119,11 @@ class Fish(db.Model):
             del dict["_sa_instance_state"]
         return dict
 
-class Application(db.Model):
+
+class Pic(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    from_user = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    to_user = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    type = db.Column(db.Integer, nullable=False, default=1)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    image_file = db.Column(db.String(40), nullable=False)
     create_date = db.Column(db.DateTime, nullable=False, default=datetime.now())
     def to_json(self):
         dict = self.__dict__
@@ -133,11 +134,27 @@ class Application(db.Model):
 class Notice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     to_user = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    content = db.Column(db.Text, nullable=False)
+    from_user = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    content_type = db.Column(db.Integer, nullable=False)
     create_date = db.Column(db.DateTime, nullable=False, default=datetime.now())
+    #type 1 :用户from_user关注了你
+    #type 2 :你关注的用户from_user发表了新动态
+    #type 3 :用户from_user评论了你的动态
 
     def to_json(self):
         dict = self.__dict__
         if "_sa_instance_state" in dict:
             del dict["_sa_instance_state"]
         return dict
+
+#class Application(db.Model):
+#    id = db.Column(db.Integer, primary_key=True)
+#    from_user = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+#    to_user = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+#    type = db.Column(db.Integer, nullable=False, default=1)
+#    create_date = db.Column(db.DateTime, nullable=False, default=datetime.now())
+#    def to_json(self):
+#        dict = self.__dict__
+#        if "_sa_instance_state" in dict:
+#            del dict["_sa_instance_state"]
+#         return dict
