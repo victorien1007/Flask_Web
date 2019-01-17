@@ -8,4 +8,4 @@ Pillow
 keras
 numpy
 matplotlib
-psycopg2
+psycopg2_binary

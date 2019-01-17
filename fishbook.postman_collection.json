@@ -172,93 +172,6 @@
 			"response": []
 		},
 		{
-			"name": "127.0.0.1:5000/fishbook/api/friend/add/1",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "127.0.0.1:5000/fishbook/api/friend/add/1",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "5000",
-					"path": [
-						"fishbook",
-						"api",
-						"friend",
-						"add",
-						"1"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "127.0.0.1:5000/fishbook/api/application/1/1",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "127.0.0.1:5000/fishbook/api/application/1/1",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "5000",
-					"path": [
-						"fishbook",
-						"api",
-						"application",
-						"1",
-						"1"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "127.0.0.1:5000/fishbook/api/friend/delete/1",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "127.0.0.1:5000/fishbook/api/friend/delete/1",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "5000",
-					"path": [
-						"fishbook",
-						"api",
-						"friend",
-						"delete",
-						"1"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "127.0.0.1:5000/fishbook/api/black/add/1",
 			"request": {
 				"method": "POST",
@@ -372,11 +285,6 @@
 							"key": "title",
 							"value": "",
 							"type": "text"
-						},
-						{
-							"key": "image",
-							"type": "file",
-							"src": ""
 						},
 						{
 							"key": "content",
@@ -669,7 +577,7 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "127.0.0.1:5000/fishbook/api/posts/5",
+					"raw": "127.0.0.1:5000/fishbook/api/posts/1",
 					"host": [
 						"127",
 						"0",
@@ -681,14 +589,14 @@
 						"fishbook",
 						"api",
 						"posts",
-						"5"
+						"1"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "127.0.0.1:5000/fishbook/api/identification",
+			"name": "127.0.0.1:5000/fishbook/api/image/identification",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -703,7 +611,7 @@
 					]
 				},
 				"url": {
-					"raw": "127.0.0.1:5000/fishbook/api/identification",
+					"raw": "127.0.0.1:5000/fishbook/api/image/identification",
 					"host": [
 						"127",
 						"0",
@@ -714,6 +622,7 @@
 					"path": [
 						"fishbook",
 						"api",
+						"image",
 						"identification"
 					]
 				}
@@ -943,6 +852,310 @@
 						"api",
 						"fish",
 						"list"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "127.0.0.1:5000/fishbook/api/follow/add/1",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "127.0.0.1:5000/fishbook/api/follow/add/5",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"fishbook",
+						"api",
+						"follow",
+						"add",
+						"5"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "127.0.0.1:5000/fishbook/api/follow/delete/1",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "127.0.0.1:5000/fishbook/api/follow/delete/5",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"fishbook",
+						"api",
+						"follow",
+						"delete",
+						"5"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "127.0.0.1:5000/fishbook/api/follow/remove/2",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "127.0.0.1:5000/fishbook/api/follow/remove/2",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"fishbook",
+						"api",
+						"follow",
+						"remove",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "127.0.0.1:5000/fishbook/api/follow/list",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "127.0.0.1:5000/fishbook/api/follow/list",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"fishbook",
+						"api",
+						"follow",
+						"list"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "127.0.0.1:5000/fishbook/api/image/upload",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "image",
+							"type": "file",
+							"src": ""
+						}
+					]
+				},
+				"url": {
+					"raw": "127.0.0.1:5000/fishbook/api/image/upload",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"fishbook",
+						"api",
+						"image",
+						"upload"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "127.0.0.1:5000/fishbook/api/image/list",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "127.0.0.1:5000/fishbook/api/image/list",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"fishbook",
+						"api",
+						"image",
+						"list"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "127.0.0.1:5000/fishbook/api/image/delete/1",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "127.0.0.1:5000/fishbook/api/image/delete/1",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"fishbook",
+						"api",
+						"image",
+						"delete",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "127.0.0.1:5000/fishbook/api/image/identification/1",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "127.0.0.1:5000/fishbook/api/image/identification/1",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"fishbook",
+						"api",
+						"image",
+						"identification",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "127.0.0.1:5000/fishbook/api/post/new/1",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "title",
+							"value": "",
+							"type": "text"
+						},
+						{
+							"key": "content",
+							"value": "testing",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "127.0.0.1:5000/fishbook/api/post/new/1",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"fishbook",
+						"api",
+						"post",
+						"new",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "127.0.0.1:5000/fishbook/api/notice/delete/1",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "127.0.0.1:5000/fishbook/api/notice/delete/1",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"fishbook",
+						"api",
+						"notice",
+						"delete",
+						"1"
 					]
 				}
 			},

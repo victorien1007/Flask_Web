@@ -1,12 +1,11 @@
-import os.path
-from fishbook import app
+import os
 from PIL import Image
 from keras import backend
 from tensorflow import Graph, Session
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Dropout
-
 img_width, img_height = 100, 100
+
 import tensorflow as tf
 global graph,model
 graph=tf.get_default_graph()
@@ -36,14 +35,9 @@ def create_model():
 
     return model
 
-'''graph=Graph()
-with graph.as_default():
-    session=Session(graph=graph)
-    with session.as_default():
-        create_model()'''
-
 cnn_model = create_model()
-cnn_model.load_weights(os.path.join(app.root_path, 'weight', 'fish_model_weights.h5'))
+
+cnn_model.load_weights(os.path.dirname(__file__)+'/weight/fish_model_weights.h5')
 
 #PART 2. Using Neural Networks for Target Classification
 import numpy as np
@@ -53,9 +47,9 @@ from keras.preprocessing.image import load_img, img_to_array
 def load_image(img_path):
 
     img = load_img(img_path, target_size=(img_width, img_height))
-    #plt.imshow(img)
 
-    #img.save(os.path.dirname(__file__) + '/images/test.jpg')
+
+    img.save(os.path.dirname(__file__) + '/images/test.jpg')
 
     return img
 
@@ -80,8 +74,3 @@ def fish_identification(img):
     result = fish_dict[maximum_probability_index] # Get fish classification results
 
     return result
-
-
-def fish(path):
-    image=load_image(path)
-    return fish_identification(image)

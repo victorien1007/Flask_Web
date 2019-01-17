@@ -29,113 +29,176 @@ python run.py
 http://127.0.0.1:5000/fishbook/api:
 
 #User
-/register fin
+/register
 注册
 json
 
-/login fin
+/login
 登录
 json
 
-/accout fin
+/accout
 账户信息
 
-/accout/<int:userid> debug
+/accout/<int:userid>
 好友的账户信息
 
-/update  fin
+/update
 修改信息，可只提交修改项，pwd和confirm_pwd必须 填写 并 一致 才能修改密码
 form-data
 
-/logout  debug
+/logout
 登出
 
-/myposts fin
+/myposts
 自己发的朋友圈
 
 /posts
-朋友圈（自己+好友） fin
+朋友圈（自己+好友）
 
-/posts/<int:userid> fin
+/posts/<int:userid>
 特定某个人的朋友圈
-必须是好友
 
-/friend/add/<int:userid>  fin 废弃
+/follow/add/<int:userid>
+添加关注，在对方黑名单里会直接拒绝
+
+/follow/delete/<int:userid>
+不在关注
+
+/follow/remove/<int:userid>
+将你从他的关注列表里移除
+
+/follow/list
+查看谁在关注你
+
+/friend/add/<int:userid> 废弃
 发送申请用户添加朋友请求，双向添加
 在对方黑名单里会直接拒绝
 
-/application/<int:applicationid>/<int:way> fin 废弃
+/application/<int:applicationid>/<int:way> 废弃
 接受（way=1）或拒绝(way=2)申请。
 
-/friend/delete/<int:userid>  fin 废弃
+/friend/delete/<int:userid> 废弃
 删除朋友，双向
 
-/follow/add
-
-/follow/delete
-
-/black/add/<int:userid>  fin
+/black/add/<int:userid>
 添加到黑名单，自动删除好友
-/black/delete/<int:userid>  fin
+
+/black/delete/<int:userid>
 从黑名单删除
 
-#Post
-/post/<int:postid> fin
-查看某个朋友圈，和该的评论（自己或朋友）
+#Images
 
-/post/new fin
+/image/upload
+上传图片到相册
+form-data
+
+/image/list
+用户相册
+
+/image/delete/<int:picid>
+删除
+
+/image/identification
+识别鱼
+form-data
+
+/image/identification/<int:picid>
+识别已经上传的鱼
+
+
+#Post
+/post/<int:postid>
+查看某个动态，和该动态的评论
+
+/post/new
 写朋友圈
 form-data
 
-/post/update/<int:postid> fin
+/post/new/<int:picid>
+写朋友圈, 用已经上传的图片
+form-data
+
+/post/update/<int:postid>
 修改，可只提交修改项
 form-data
 
-/post/delete/<int:postid> fin
+/post/delete/<int:postid>
 删朋友圈，同时删除所有评论
 
-/like/<int:postid> fin
+/like/<int:postid>
 赞
 
-/dislike/<int:postid> fin
+/dislike/<int:postid>
 取消赞
 
 #Comment
 
-/comment/new/<int:postid> fin
+/comment/new/<int:postid>
 json
 
-/comment/update/<int:commentid> fin
+/comment/update/<int:commentid>
 只能改内容
 json
 
-/comment/delete/<int:commentid> fin
+/comment/delete/<int:commentid>
 
 #Fish
-/fish/<int:fishid> fin
+/fish/<int:fishid>
 
-/fish/new fin
+/fish/new
 form-data
 
-/fish/update/<int:fishid> fin
+/fish/update/<int:fishid>
 form-data
 
-/fish/delete/<int:fishid> fin
+/fish/delete/<int:fishid>
 
-/fish/list fin
+/fish/list
 
-/identification fin
-识别鱼
-form-data
+#Notice
+/notice/delete/<int:noticeid>
+删除消息
 
-#调试用
-/up
-/alluser
-/allpost
-/allcomment
-/allfish
+#===============update===============
+#新添加
 
-关注
-添加follow 修改usermodel,
-用户设置查看动态
-所有人都点赞
+/image/upload
+上传图片到相册
+
+/image/list
+用户相册
+
+/image/delete/<int:picid>
+删除
+
+/image/identification/<int:picid>
+识别已经上传的鱼图片
+
+/post/new/<int:picid>
+写朋友圈, 用已经上传的图片
+
+/notice/delete/<int:noticeid>
+删除消息
+
+#改动
+/post/update/<int:postid>
+不再能修改图片了
+
+/posts/<int:userid>
+在对方黑名单不再可见
+
+好友换成了关注，删除了所有仅好友可见判定
+
+关注，写动态，评论会发出对应的通知。
+
+/myposts
+/posts
+/posts/<int:userid>
+现在能正确的显示图片链接
+
+图片保存save_picture保存之前会检查是否已经存在，如果存在同名文件重新随机一个hash名（我也不知道行不行，反正32位哈希能重就真是见鬼了）
+
+#！
+更新之后别忘了用db_create重置数据库，以及重新导入postman包。
+我感觉还缺一个搜索之类的功能，你们觉得怎么怎么写合适？
