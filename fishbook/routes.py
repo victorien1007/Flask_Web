@@ -49,9 +49,10 @@ def check_inblack(user):
 def save_picture(picture, type): #1:profile;2:post;3:fish
     random_hex = secrets.token_hex(16)
     _, f_ext = os.path.splitext(picture.filename)
-    picture_fn = random_hex + f_ext
+
     f=False
     while not f:
+        picture_fn = random_hex + f_ext
         if type == 1:
             picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn)
         elif type == 2:
