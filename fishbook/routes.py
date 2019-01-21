@@ -13,7 +13,7 @@ from fishbook.fish import fish_identification, load_image
 from fishbook import app
 url = 'http://127.0.0.1:5000'
 
-fish = Blueprint('fish', __name__)
+fishbook = Blueprint('fishbook', __name__)
 
 def check_follow(userid):
     i = len(current_user.follow)
@@ -106,7 +106,7 @@ def notice_type_to_content(notice):
     _notice['content']=content
     return _notice
 
-@fish.route("/register", methods=['POST'])
+@fishbook.route("/register", methods=['POST'])
 def register():
     if current_user.is_authenticated:
         return jsonify({'code': 0, 'message': 'you are already login.'})
@@ -133,7 +133,7 @@ def register():
     return jsonify({'code': 1, 'message': 'Resgister successful.'})
 
 
-@fish.route("/login", methods=['POST'])
+@fishbook.route("/login", methods=['POST'])
 def login():
     if current_user.is_authenticated:
         return jsonify({'code': 0, 'message': 'you are already login.'})
@@ -150,12 +150,12 @@ def login():
     return jsonify({'code': 0, 'message': 'Login Unsuccessful!'})
 
 
-@fish.route("/logout", methods=['POST'])
+@fishbook.route("/logout", methods=['POST'])
 def logout():
     logout_user()
     return jsonify({'code': 1, 'message': 'You are logout'})
 
-@fish.route("/account", methods=['POST'])
+@fishbook.route("/account", methods=['POST'])
 @login_required
 def myaccount():
     user = current_user.to_json()
@@ -183,7 +183,7 @@ def myaccount():
     data['notice']=_notices
     return jsonify(data)
 
-@fish.route("/account/<int:userid>", methods=['POST'])
+@fishbook.route("/account/<int:userid>", methods=['POST'])
 @login_required
 def account(userid):
     user = User.query.filter_by(id=userid).first()
@@ -199,7 +199,7 @@ def account(userid):
     data['user']=_user
     return jsonify(data)
 
-@fish.route("/update", methods=['POST'])
+@fishbook.route("/update", methods=['POST'])
 @login_required
 def update():
     image = request.files.get('image', default=None)
@@ -236,7 +236,7 @@ def update():
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return jsonify({'code': 1, 'message': 'Update success'})
 
-# @fish.route("/friend/add/<int:userid>", methods=['POST'])
+# @fishbook.route("/friend/add/<int:userid>", methods=['POST'])
 # @login_required
 # def addfriend(userid):
 #     if current_user.id == userid :
@@ -256,7 +256,7 @@ def update():
 #     db.session.commit()
 #     return jsonify({'code': 1, 'message': 'Sended friend request success'})
 #
-# @fish.route("/application/<int:applicationid>/<int:way>", methods=['POST'])
+# @fishbook.route("/application/<int:applicationid>/<int:way>", methods=['POST'])
 # @login_required
 # def application(applicationid, way):
 #     application = Application.query.filter_by(id=applicationid).first()
@@ -285,7 +285,7 @@ def update():
 
 
 #
-# @fish.route("/friend/delete/<int:userid>", methods=['POST'])
+# @fishbook.route("/friend/delete/<int:userid>", methods=['POST'])
 # @login_required
 # def deletefriend(userid):
 #     if delete(userid):
@@ -308,7 +308,7 @@ def send_notice_1(userid):
     db.session.add(notice)
     db.session.commit()
 
-@fish.route("/follow/add/<int:userid>", methods=['POST'])
+@fishbook.route("/follow/add/<int:userid>", methods=['POST'])
 @login_required
 def addfollow(userid):
     if current_user.id ==userid:
@@ -325,7 +325,7 @@ def addfollow(userid):
     db.session.commit()
     return jsonify({'code': 1, 'message': 'Add to followlist success'})
 
-@fish.route("/follow/delete/<int:userid>", methods=['POST'])
+@fishbook.route("/follow/delete/<int:userid>", methods=['POST'])
 @login_required
 def deletefollow(userid):
     user = User.query.filter_by(id=userid).first()
@@ -337,7 +337,7 @@ def deletefollow(userid):
     db.session.commit()
     return jsonify({'code': 1, 'message': 'Delete from followlist success'})
 
-@fish.route("/follow/remove/<int:userid>", methods=['POST'])
+@fishbook.route("/follow/remove/<int:userid>", methods=['POST'])
 @login_required
 def removefollow(userid):
     user = User.query.filter_by(id=userid).first()
@@ -349,7 +349,7 @@ def removefollow(userid):
     db.session.commit()
     return jsonify({'code': 1, 'message': 'Delete from followlist success'})
 
-@fish.route("/follow/list", methods=['POST'])
+@fishbook.route("/follow/list", methods=['POST'])
 @login_required
 def followlist():
     users=User.query.filter(User.follow.contains([current_user.id])).all()
@@ -359,7 +359,7 @@ def followlist():
 
     return jsonify({'code': 1, 'list': list})
 
-@fish.route("/black/add/<int:userid>", methods=['POST'])
+@fishbook.route("/black/add/<int:userid>", methods=['POST'])
 @login_required
 def addblack(userid):
     if current_user.id ==userid:
@@ -376,7 +376,7 @@ def addblack(userid):
     return jsonify({'code': 1, 'message': 'Add to blacklist success'})
 
 
-@fish.route("/black/delete/<int:userid>", methods=['POST'])
+@fishbook.route("/black/delete/<int:userid>", methods=['POST'])
 @login_required
 def deleteblack(userid):
     user = User.query.filter_by(id=userid).first()
@@ -388,7 +388,7 @@ def deleteblack(userid):
     db.session.commit()
     return jsonify({'code': 1, 'message': 'Delete from blacklist success'})
 
-@fish.route("/image/upload", methods=['POST'])
+@fishbook.route("/image/upload", methods=['POST'])
 @login_required
 def image_upload():
     image = request.files.get('image', default=None)
@@ -396,7 +396,7 @@ def image_upload():
     save_picture(image,2)
     return jsonify({'code':1})
 
-@fish.route("/image/list", methods=['POST'])
+@fishbook.route("/image/list", methods=['POST'])
 @login_required
 def image_list():
     pics = Pic.query.filter_by(user_id=current_user.id).all()
@@ -411,7 +411,7 @@ def image_list():
     data['images']=_pics
     return jsonify(data)
 
-@fish.route("/image/delete/<int:picid>", methods=['POST'])
+@fishbook.route("/image/delete/<int:picid>", methods=['POST'])
 @login_required
 def image_delete(picid):
     pic=Pic.query.filter_by(id = picid).first()
@@ -444,7 +444,7 @@ def identif(picture_fn):
     data['result_fish'] = fish
     return jsonify(data)
 
-@fish.route("/image/identification", methods=['POST'])
+@fishbook.route("/image/identification", methods=['POST'])
 @login_required
 def identification():
     image_file = request.files.get('image', default=None)
@@ -454,7 +454,7 @@ def identification():
     else:
         return jsonify({'code':0, 'message':'image file error!'})
 
-@fish.route("/image/identification/<int:picid>", methods=['POST'])
+@fishbook.route("/image/identification/<int:picid>", methods=['POST'])
 @login_required
 def _identification(picid):
     pic = Pic.query.get_or_404(picid)
@@ -464,7 +464,7 @@ def _identification(picid):
         return jsonify({'code':0, 'message':'This is not your file!'})
     return identif(pic.image_file)
 
-@fish.route("/post/<int:postid>", methods=['POST'])
+@fishbook.route("/post/<int:postid>", methods=['POST'])
 @login_required
 def post(postid):
     post = Post.query.get_or_404(postid)
@@ -486,7 +486,7 @@ def send_notice_2():
         db.session.add(notice)
         db.session.commit()
 
-@fish.route("/post/new", methods=['POST'])
+@fishbook.route("/post/new", methods=['POST'])
 @login_required
 def newpost():
     title = request.form.get('title', default=None)
@@ -505,7 +505,7 @@ def newpost():
     send_notice_2()
     return jsonify({'code': 1, 'message': 'Your post has been created!'})
 
-@fish.route("/post/new/<picid>", methods=['POST'])
+@fishbook.route("/post/new/<picid>", methods=['POST'])
 @login_required
 def _newpost(picid):
     pic=Pic.query.get_or_404(picid)
@@ -526,7 +526,7 @@ def _newpost(picid):
     send_notice_2()
     return jsonify({'code': 1, 'message': 'Your post has been created!'})
 
-@fish.route("/post/update/<int:postid>", methods=['POST'])
+@fishbook.route("/post/update/<int:postid>", methods=['POST'])
 @login_required
 def updatepost(postid):
     post = Post.query.get_or_404(postid)
@@ -548,7 +548,7 @@ def updatepost(postid):
     return jsonify({'code': 1, 'message': 'Your post has been updated!'})
 
 
-@fish.route("/post/delete/<int:postid>", methods=['POST'])
+@fishbook.route("/post/delete/<int:postid>", methods=['POST'])
 @login_required
 def deletepost(postid):
     post = Post.query.get_or_404(postid)
@@ -566,7 +566,7 @@ def send_notice_3(userid):
     db.session.add(notice)
     db.session.commit()
 
-@fish.route("/comment/new/<int:postid>", methods=['POST'])
+@fishbook.route("/comment/new/<int:postid>", methods=['POST'])
 @login_required
 def newcomment(postid):
     post = Post.query.get_or_404(postid)
@@ -585,7 +585,7 @@ def newcomment(postid):
 
     return jsonify({'code': 1, 'message': 'Your comment has been created!'})
 
-@fish.route("/comment/update/<int:commentid>", methods=['POST'])
+@fishbook.route("/comment/update/<int:commentid>", methods=['POST'])
 @login_required
 def updatecomment(commentid):
     comment = Comment.query.get_or_404(commentid)
@@ -599,7 +599,7 @@ def updatecomment(commentid):
         db.session.commit()
         return jsonify({'code': 1, 'message': 'Your comment has been updated!'})
 
-@fish.route("/comment/delete/<int:commentid>", methods=['POST'])
+@fishbook.route("/comment/delete/<int:commentid>", methods=['POST'])
 @login_required
 def deletecomment(commentid):
     comment = Comment.query.get_or_404(commentid)
@@ -617,7 +617,7 @@ def check_like(post):
             return True
     return False
 
-@fish.route("/like/<int:postid>", methods=['POST'])
+@fishbook.route("/like/<int:postid>", methods=['POST'])
 @login_required
 def like(postid):
     post = Post.query.filter_by(id=postid).first()
@@ -631,7 +631,7 @@ def like(postid):
     return jsonify({'code': 1, 'message': 'Add to likelist success'})
 
 
-@fish.route("/dislike/<int:postid>", methods=['POST'])
+@fishbook.route("/dislike/<int:postid>", methods=['POST'])
 @login_required
 def dislike(postid):
     post = Post.query.filter_by(id=postid).first()
@@ -644,7 +644,7 @@ def dislike(postid):
     return jsonify({'code': 1, 'message': 'Delete from dislikelist success'})
 
 
-@fish.route("/myposts", methods=['POST'])
+@fishbook.route("/myposts", methods=['POST'])
 @login_required
 def myposts():
     posts = Post.query.filter_by(user_id=current_user.id).all()
@@ -659,7 +659,7 @@ def myposts():
     data['posts'] = _posts
     return jsonify(data)
 
-@fish.route("/posts", methods=['POST'])
+@fishbook.route("/posts", methods=['POST'])
 @login_required
 def posts():
     _posts=[]
@@ -683,7 +683,7 @@ def posts():
     data['posts'] = _posts
     return jsonify(data)
 
-@fish.route("/posts/<int:userid>", methods=['POST'])
+@fishbook.route("/posts/<int:userid>", methods=['POST'])
 @login_required
 def userposts(userid):
     user = User.query.filter_by(id=userid).first()
@@ -703,7 +703,7 @@ def userposts(userid):
     data['posts'] = _posts
     return jsonify(data)
 
-@fish.route("/fish/list", methods=['POST'])
+@fishbook.route("/fish/list", methods=['POST'])
 @login_required
 def fishlist():
     fishs = Fish.query.all()
@@ -717,7 +717,7 @@ def fishlist():
     data['fishs'] = _fish
     return jsonify({'code': 1, 'fish': _fish})
 
-@fish.route("/fish/<int:fishid>", methods=['POST'])
+@fishbook.route("/fish/<int:fishid>", methods=['POST'])
 @login_required
 def fish(fishid):
     fish = Fish.query.get_or_404(fishid)
@@ -726,7 +726,7 @@ def fish(fishid):
     return jsonify({'code': 1, 'fish': fish})
 
 
-@fish.route("/fish/new", methods=['POST'])
+@fishbook.route("/fish/new", methods=['POST'])
 @login_required
 def newfish():
     if not current_user.admin:
@@ -757,7 +757,7 @@ def newfish():
     db.session.commit()
     return jsonify({'code': 1, 'message': 'A new kind of fish has been created!'})
 
-@fish.route("/fish/update/<int:fishid>", methods=['POST'])
+@fishbook.route("/fish/update/<int:fishid>", methods=['POST'])
 @login_required
 def updatefish(fishid):
     if not current_user.admin:
@@ -789,7 +789,7 @@ def updatefish(fishid):
     db.session.commit()
     return jsonify({'code': 1, 'message': 'Your post has been updated!'})
 
-@fish.route("/fish/delete/<int:fishid>", methods=['POST'])
+@fishbook.route("/fish/delete/<int:fishid>", methods=['POST'])
 @login_required
 def deletefish(fishid):
     if not current_user.admin:
@@ -800,7 +800,7 @@ def deletefish(fishid):
     db.session.commit()
     return jsonify({'code': 1, 'message': 'Fish data has been deleted!'})
 
-@fish.route("/notice/delete/<int:noticeid>", methods=['POST'])
+@fishbook.route("/notice/delete/<int:noticeid>", methods=['POST'])
 @login_required
 def deletenotice(noticeid):
     notice = Notice.query.get_or_404(noticeid)

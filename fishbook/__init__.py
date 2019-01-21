@@ -13,6 +13,6 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 login_manager.login_message_category = 'info'
 
-from fishbook.routes import fish,test
-app.register_blueprint(fish, url_prefix='/fishbook/api')
+from fishbook.routes import fishbook,test
+app.register_blueprint(fishbook, url_prefix='/fishbook/api')
 app.register_blueprint(test, url_prefix='/')
