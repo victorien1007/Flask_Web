@@ -15,7 +15,7 @@ handlers:
   static_dir: static/profile_pics
 
 - url: /.*
-  script: auto
+  script: main.app
 
 runtime_config:
-    python_version: 3.6
+    python_version: 3
