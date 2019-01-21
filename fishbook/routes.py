@@ -10,9 +10,8 @@ from fishbook.models import User, Post, Comment, Pic, Fish, Notice, AlchemyEncod
 from flask_login import login_user, current_user, logout_user, login_required
 from fishbook.fish import fish_identification, load_image
 from fishbook import app
-url = 'http://127.0.0.1:5000'
 
-fishbook = Blueprint('fishbook', __name__)
+fishbook = Blueprint('fishbook', __name__, url_prefix='/fishbook/api')
 
 def check_follow(userid):
     i = len(current_user.follow)
@@ -810,18 +809,8 @@ def deletenotice(noticeid):
     return jsonify({'code': 1, 'message': 'Notice data has been deleted!'})
 
 
-test = Blueprint('test', __name__)
+test = Blueprint('test', __name__, url_prefix='/')
 
 @test.route("/")
 def about():
     return render_template('about.html', title='About')
-
-@test.route("/up")
-def up():
-    return render_template('up.html')
-
-@test.route('/upload', methods=['POST'])
-def uploadiamge():
-
-    file = request.files['filechoose']
-    file.save(os.path.dirname(__file__) + '/images/test.jpg')
