@@ -440,7 +440,7 @@ def identif(picture_fn):
     data={}
     data['code'] = 1
     fish = fish.to_json()
-    fish['image_file'] = url_for('static', filename='post_pics/' + fish['image_file'])
+    fish['image_file'] = url_for('static', filename='fish_pics/' + fish['image_file'])
     data['result_fish'] = fish
     return jsonify(data)
 
