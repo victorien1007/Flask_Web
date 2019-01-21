@@ -1,7 +1,6 @@
 import os.path
 import secrets
 import json
-from flask import requests
 from datetime import datetime
 from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, jsonify, Blueprint
