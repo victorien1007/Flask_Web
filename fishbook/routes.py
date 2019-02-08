@@ -432,6 +432,8 @@ def image_delete(picid):
 
 def identif(picture_fn):
     picture_path = os.path.join(app.root_path, 'static/post_pics', picture_fn)
+    if not os.path.exists(picture_path):
+        return jsonify({'code':0, 'message':'image file error!'})
     im=load_image(picture_path)
     result=fish_identification(im)
     fish=Fish.query.filter_by(name=result).first()
