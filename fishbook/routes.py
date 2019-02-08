@@ -302,7 +302,7 @@ def update():
 #     else :
 #         return False
 def send_notice_1(userid):
-    notice=Notice(from_user=current.id,to_user=userid,content_type=1)
+    notice=Notice(from_user=current_user.id,to_user=userid,content_type=1)
     db.session.add(notice)
     db.session.commit()
 
@@ -560,7 +560,7 @@ def deletepost(postid):
     return jsonify({'code': 1, 'message': 'Your post has been deleted!'})
 
 def send_notice_3(userid):
-    notice=Notice(from_user=current.id,to_user=userid,content_type=3)
+    notice=Notice(from_user=current_user.id,to_user=userid,content_type=3)
     db.session.add(notice)
     db.session.commit()
 
