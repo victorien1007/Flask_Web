@@ -576,7 +576,7 @@ def newcomment(postid):
     comment = Comment(content=content, user_id = current_user.id, post_id = postid)
     if to_user_id:
         comment.to_user_id=to_user_id
-    notice= Notice(to_user = post.user_id, content = current_user.username +'commented on your post.')
+    #notice= Notice(to_user = post.user_id, content = current_user.username +'commented on your post.')
     db.session.add(comment)
     send_notice_3(post.user_id)
     db.session.commit()
@@ -668,13 +668,12 @@ def posts():
             if post.image_file:
                 _post['image_file'] = url_for('static', filename='post_pics/' + post.image_file)
             _posts.append(_post)
-    posts = Post.query.filter_by(user_id=current_user.id).all()
+    posts = Post.query.filter_by(user_id = current_user.id).all()
     for post in posts:
         _post=post.to_json()
-        _post['image_file'] = url_for('static', filename='post_pics/' + post.image_file)
+        if post.image_file:
+            _post['image_file'] = url_for('static', filename='post_pics/' + post.image_file)
         _posts.append(_post)
-
-
     _posts.sort(key=lambda x: x['create_date'], reverse=True)
     data={}
     data['code'] = 1

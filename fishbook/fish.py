@@ -49,7 +49,7 @@ def load_image(img_path):
     img = load_img(img_path, target_size=(img_width, img_height))
 
 
-    img.save(os.path.dirname(__file__) + '/images/test.jpg')
+    #img.save(os.path.dirname(__file__) + '/images/test.jpg')
 
     return img
 
