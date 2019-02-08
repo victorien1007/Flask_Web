@@ -329,7 +329,7 @@ def deletefollow(userid):
     user = User.query.filter_by(id=userid).first()
     if user is None:
         return jsonify({'code': 0, 'message': 'This user does not exist'})
-    if not check_black(userid):
+    if not check_follow(userid):
         return jsonify({'code': 0, 'message': 'This user are not in your followerlist'})
     current_user.follow.remove(userid)
     db.session.commit()
