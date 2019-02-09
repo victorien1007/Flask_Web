@@ -3,7 +3,7 @@ import secrets
 import json
 from datetime import datetime
 from PIL import Image
-from flask import render_template, url_for, flash, redirect, request, jsonify, Blueprint
+from flask import render_template, url_for, flash, redirect, request, jsonify, Blueprint, current_app
 from fishbook import db, bcrypt, storage
 from fishbook.forms import RegistrationForm, LoginForm, UpdateAccountForm
 from fishbook.models import User, Post, Comment, Pic, Fish, Notice, AlchemyEncoder
@@ -826,7 +826,6 @@ def upload_image_file(file):
         file.filename,
         file.content_type
     )
-
     current_app.logger.info(
         "Uploaded file %s as %s.", file.filename, public_url)
 
