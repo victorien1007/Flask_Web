@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, jsonify, Blueprint
-from fishbook import db, bcrypt
+from fishbook import db, bcrypt, storage
 from fishbook.forms import RegistrationForm, LoginForm, UpdateAccountForm
 from fishbook.models import User, Post, Comment, Pic, Fish, Notice, AlchemyEncoder
 from flask_login import login_user, current_user, logout_user, login_required
@@ -812,6 +812,34 @@ def deletenotice(noticeid):
 
 test = Blueprint('test', __name__, url_prefix='/')
 
-@test.route("/")
+# [START upload_image_file]
+def upload_image_file(file):
+    """
+    Upload the user-uploaded file to Google Cloud Storage and retrieve its
+    publicly-accessible URL.
+    """
+    if not file:
+        return None
+
+    public_url = storage.upload_file(
+        file.read(),
+        file.filename,
+        file.content_type
+    )
+
+    current_app.logger.info(
+        "Uploaded file %s as %s.", file.filename, public_url)
+
+    return public_url
+# [END upload_image_file]
+
+@test.route("/", methods=['POST'])
 def about():
     return render_template('about.html', title='About')
+
+@test.route("/upload", methods=['POST'])
+def up():
+    image = request.files.get('image', default=None)
+    image_url = upload_image_file(request.files.get('image'))
+
+    return jsonify({'code': 1,'url': image_url })
