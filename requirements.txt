@@ -1,6 +1,6 @@
-flask
-flask_bcrypt
-flask_login
+Flask==1.0.2
+Flask_bcrypt
+Flask_login
 flask_sqlalchemy
 flask_wtf
 WTForms
