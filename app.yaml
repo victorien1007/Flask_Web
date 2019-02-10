@@ -20,4 +20,4 @@ handlers:
   script: main.app
 
 runtime_config:
-    python_version: python3.6
+    python_version: 3.6
