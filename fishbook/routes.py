@@ -11,7 +11,7 @@ from flask_login import login_user, current_user, logout_user, login_required
 from fishbook.fish import fish_identification, load_image
 from fishbook import app
 
-fishbook = Blueprint('fishbook', __name__, url_prefix='/fishbook/api')
+fishbookapi = Blueprint('fishbook', __name__, url_prefix='/fishbook/api')
 
 def check_follow(userid):
     i = len(current_user.follow)

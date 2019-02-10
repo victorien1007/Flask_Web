@@ -25,3 +25,5 @@ tensorflow==1.13.0rc1
 virtualenv==16.2.0
 Werkzeug==0.14.1
 WTForms==2.2.1
+image
+matplotlib
