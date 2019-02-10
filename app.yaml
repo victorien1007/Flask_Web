@@ -1,7 +1,7 @@
 runtime: python
 env: flex
 
-entrypoint: python3 main.py
+entrypoint: python3.6 main.py
 
 handlers:
 - url: /static
