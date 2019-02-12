@@ -135,6 +135,7 @@ class Notice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     to_user = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     from_user = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=True)
     content_type = db.Column(db.Integer, nullable=False)
     create_date = db.Column(db.DateTime, nullable=False, default=datetime.now())
     #type 1 :用户from_user关注了你

@@ -90,10 +90,11 @@ def delete_picture(picture, type):
             os.remove(picture_path)
 
 def notice_type_to_content(notice):
-    _notice={'id':notice.id}
+    _notice=notice.to_json()
     user = User.query.get_or_404(notice.from_user)
     if notice.content_type==1:
         content=user.username+' become one of you follower.'
+        del _notice['post_id']
     elif notice.content_type==2:
         content=user.username+' send a new post.'
     elif notice.content_type==3:
@@ -101,6 +102,7 @@ def notice_type_to_content(notice):
         #type 1 :用户from_user关注了你
         #type 2 :你关注的用户from_user发表了新动态
         #type 3 :用户from_user评论了你的动态
+    _notice['from_user_name']=user.username
     _notice['content']=content
     return _notice
 
@@ -171,15 +173,26 @@ def myaccount():
         black_list.append({uid:u.username})
     user['black']=black_list
 
+
+    data={}
+    data['code']=1
+    data['user']=user
+
+    return jsonify(data)
+
+@fishbookapi.route("/notice", methods=['POST'])
+@login_required
+def notice():
+
     notices=Notice.query.filter_by(to_user=current_user.id).all()
     _notices=[]
     for notice in notices:
         _notices.append(notice_type_to_content(notice))
     data={}
     data['code']=1
-    data['user']=user
     data['notice']=_notices
     return jsonify(data)
+
 
 @fishbookapi.route("/account/<int:userid>", methods=['POST'])
 @login_required
@@ -469,20 +482,29 @@ def _identification(picid):
 def post(postid):
     post = Post.query.get_or_404(postid)
     _post=post.to_json()
+
+    data={}
+    data['code'] = 1
+    data['post'] = _post
+    return jsonify(data)
+
+@fishbookapi.route("/post/comment/<int:postid>", methods=['POST'])
+@login_required
+def postcomment(postid):
+    post = Post.query.get_or_404(postid)
     comments = Comment.query.filter_by(post_id=postid).all()
     _comment=[]
     for comment in comments:
         _comment.append(comment.to_json())
     data={}
     data['code'] = 1
-    data['post'] = _post
     data['comment'] = _comment
     return jsonify(data)
 
-def send_notice_2():
+def send_notice_2(postid):
     users = User.query.filter(User.follow.contains([current_user.id])).all()
     for user in users:
-        notice = Notice(to_user=user.id,from_user=current_user.id,content_type=2)
+        notice = Notice(to_user=user.id,from_user=current_user.id,content_type=2,post_id=postid)
         db.session.add(notice)
         db.session.commit()
 
@@ -502,7 +524,7 @@ def newpost():
         post.image_file = picture_file
     db.session.add(post)
     db.session.commit()
-    send_notice_2()
+    send_notice_2(post.id)
     return jsonify({'code': 1, 'message': 'Your post has been created!'})
 
 @fishbookapi.route("/post/new/<picid>", methods=['POST'])
@@ -523,7 +545,7 @@ def _newpost(picid):
         post.title=title
     db.session.add(post)
     db.session.commit()
-    send_notice_2()
+    send_notice_2(post.id)
     return jsonify({'code': 1, 'message': 'Your post has been created!'})
 
 @fishbookapi.route("/post/update/<int:postid>", methods=['POST'])
@@ -561,8 +583,8 @@ def deletepost(postid):
     db.session.commit()
     return jsonify({'code': 1, 'message': 'Your post has been deleted!'})
 
-def send_notice_3(userid):
-    notice=Notice(from_user=current_user.id,to_user=userid,content_type=3)
+def send_notice_3(userid,postid):
+    notice=Notice(from_user=current_user.id,to_user=userid,content_type=3,post_id=postid)
     db.session.add(notice)
     db.session.commit()
 
@@ -580,9 +602,9 @@ def newcomment(postid):
         comment.to_user_id=to_user_id
     #notice= Notice(to_user = post.user_id, content = current_user.username +'commented on your post.')
     db.session.add(comment)
-    send_notice_3(post.user_id)
     db.session.commit()
-
+    if post.user_id != current_user.id:
+        send_notice_3(post.user_id,post.id)
     return jsonify({'code': 1, 'message': 'Your comment has been created!'})
 
 @fishbookapi.route("/comment/update/<int:commentid>", methods=['POST'])
