@@ -10,7 +10,7 @@ from fishbook.models import User, Post, Comment, Pic, Fish, Notice, AlchemyEncod
 from flask_login import login_user, current_user, logout_user, login_required
 from fishbook.fish import fish_identification, load_image
 from fishbook import app
-
+basepath = os.path.dirname(__file__)
 fishbookapi = Blueprint('fishbook', __name__, url_prefix='/fishbook/api')
 
 def check_follow(userid):
@@ -48,19 +48,16 @@ def save_picture(picture, type): #1:profile;2:post;3:fish
     random_hex = secrets.token_hex(16)
     _, f_ext = os.path.splitext(picture.filename)
 
-    f=False
-    while not f:
-        picture_fn = random_hex + f_ext
-        if type == 1:
-            picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn)
-        elif type == 2:
-            picture_path = os.path.join(app.root_path, 'static/post_pics', picture_fn)
-        elif type == 3:
-            picture_path = os.path.join(app.root_path, 'static/fish_pics', picture_fn)
-        else :
-            abort(403)
-        if not os.path.exists(picture_path):
-            f=True
+    picture_fn = random_hex + f_ext
+    if type == 1:
+        picture_path = os.path.join(basepath, 'static/profile_pics', picture_fn)
+    elif type == 2:
+        picture_path = os.path.join(basepath, 'static/post_pics', picture_fn)
+    elif type == 3:
+        picture_path = os.path.join(basepath, 'static/fish_pics', picture_fn)
+    else :
+        abort(403)
+
 
     if type == 1:
 
@@ -80,11 +77,11 @@ def save_picture(picture, type): #1:profile;2:post;3:fish
 def delete_picture(picture, type):
     if (picture != 'default.jpg') and (picture is not None):
         if type == 1:
-            picture_path = os.path.join(app.root_path, 'static/profile_pics', picture)
+            picture_path = os.path.join(basepath, 'static/profile_pics', picture)
         elif type == 2:
-            picture_path = os.path.join(app.root_path, 'static/post_pics', picture)
+            picture_path = os.path.join(basepath, 'static/post_pics', picture)
         elif type == 3:
-            picture_path = os.path.join(app.root_path, 'static/fish_pics', picture)
+            picture_path = os.path.join(basepath, 'static/fish_pics', picture)
 
         if os.path.exists(picture_path):
             os.remove(picture_path)
