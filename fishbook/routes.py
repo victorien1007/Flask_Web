@@ -1,6 +1,7 @@
 import os.path
 import secrets
 import json
+import six
 from datetime import datetime
 from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, jsonify, Blueprint, current_app
@@ -12,6 +13,9 @@ from fishbook.fish import fish_identification, load_image
 from fishbook import app
 basepath = os.path.dirname(__file__)
 fishbookapi = Blueprint('fishbook', __name__, url_prefix='/fishbook/api')
+
+def url(string, filename):
+    return current_app.config['ROOT_FILE']+string+'/'+filename
 
 def check_follow(userid):
     i = len(current_user.follow)
@@ -43,7 +47,7 @@ def check_inblack(user):
         if user.black[i] == current_user.id:
             return True
     return False
-
+"""
 def save_picture(picture, type): #1:profile;2:post;3:fish
     random_hex = secrets.token_hex(16)
     _, f_ext = os.path.splitext(picture.filename)
@@ -85,6 +89,31 @@ def delete_picture(picture, type):
 
         if os.path.exists(picture_path):
             os.remove(picture_path)
+"""
+def save_picture(picture, type):#1:profile;2:post;3:fish
+
+    if not picture:
+        return None
+
+    picture_fn = storage.upload_file(
+        picture.read(),
+        picture.filename,
+        picture.content_type,
+        type
+    )
+
+    if type == 2:
+        pic = Pic(user_id=current_user.id,image_file=picture_fn)
+        db.session.add(pic)
+        db.session.commit()
+
+    return picture_fn
+
+def delete_picture(picture, type):
+    if (picture != 'default.jpg') and (picture is not None):
+        result = storage.delete_blob(picture, type)
+        return result
+    return 'error!'
 
 def notice_type_to_content(notice):
     _notice=notice.to_json()
@@ -402,6 +431,7 @@ def image_upload():
     image = request.files.get('image', default=None)
     picture_path = os.path.join(app.root_path, 'static/post_pics', image.filename)
     save_picture(image,2)
+
     return jsonify({'code':1})
 
 @fishbookapi.route("/image/list", methods=['POST'])
@@ -441,10 +471,10 @@ def image_delete(picid):
     return jsonify({'code':1})
 
 def identif(picture_fn):
-    picture_path = os.path.join(app.root_path, 'static/post_pics', picture_fn)
-    if not os.path.exists(picture_path):
-        return jsonify({'code':0, 'message':'image file error!'})
-    im=load_image(picture_path)
+    url = current_app.config['ROOT_FILE'] + 'static/post_pics/' + picture_fn
+    if isinstance(url, six.binary_type):
+        url = url.decode('utf-8')
+    im=load_image(url)
     result=fish_identification(im)
     fish=Fish.query.filter_by(name=result).first()
     data={}
@@ -770,7 +800,7 @@ def newfish():
         fish.endangered=False
     if image:
         picture_file = save_picture(image, 3)
-        post.image_file = picture_file
+        fish.image_file = picture_file
     db.session.add(fish)
     db.session.commit()
     return jsonify({'code': 1, 'message': 'A new kind of fish has been created!'})
@@ -828,6 +858,13 @@ def deletenotice(noticeid):
     db.session.commit()
     return jsonify({'code': 1, 'message': 'Notice data has been deleted!'})
 
+@fishbookapi.route("/static/<string:folder>/<string:filename>", methods=['GET'])
+@login_required
+def static(folder,filename):
+    url=current_app.config['ROOT_FILE']+'static/'+folder+'/'+filename
+    if isinstance(url, six.binary_type):
+        url = url.decode('utf-8')
+    return redirect(url)
 
 test = Blueprint('test', __name__, url_prefix='/')
 
@@ -843,7 +880,8 @@ def upload_image_file(file):
     public_url = storage.upload_file(
         file.read(),
         file.filename,
-        file.content_type
+        file.content_type,
+        4
     )
     current_app.logger.info(
         "Uploaded file %s as %s.", file.filename, public_url)

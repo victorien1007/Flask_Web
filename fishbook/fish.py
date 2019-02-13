@@ -1,11 +1,13 @@
-import os
+import os,requests
 from PIL import Image
 from keras import backend
 from tensorflow import Graph, Session
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Dropout
 img_width, img_height = 100, 100
-
+from PIL import Image
+from io import BytesIO
+#from flask import current_app
 import tensorflow as tf
 global graph,model
 graph=tf.get_default_graph()
@@ -46,11 +48,16 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.preprocessing.image import load_img, img_to_array
 def load_image(img_path):
 
-    img = load_img(img_path, target_size=(img_width, img_height))
+    #Image.open(urlopen(img_path))
+    response = requests.get(img_path)
+    image = Image.open(BytesIO(response.content))
+    image.save(os.path.dirname(__file__) + '/images/test.jpg')
+    img = load_img(os.path.dirname(__file__) + '/images/test.jpg', target_size=(img_width, img_height))
 
-
+    #img = tf.read_file(img_path)
+    #img.size(img_width, img_height)
     #img.save(os.path.dirname(__file__) + '/images/test.jpg')
-
+    #target_size=(100,100)
     return img
 
 #image_path = './images/train/Sailfish/123.jpg'
