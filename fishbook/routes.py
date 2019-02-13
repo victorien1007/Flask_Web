@@ -185,7 +185,7 @@ def logout():
 @login_required
 def myaccount():
     user = current_user.to_json()
-    user['image_file'] = url_for('static', filename='profile_pics/' + user['image_file'])
+    user['image_file'] = url_for('pic', filename='profile_pics/' + user['image_file'])
     del user['password']
     follow_list=[]
     for uid in user['follow']:
@@ -229,7 +229,7 @@ def account(userid):
     #user.image_file = url_for(app.root_path, 'static', filename='profile_pics/' + user.image_file)
     _user={}
     _user['username'] = user.username
-    _user['image_file'] = url_for('static', filename='profile_pics/' + current_user.image_file)
+    _user['image_file'] = url_for('pic', filename='profile_pics/' + current_user.image_file)
     _user['introduction'] = user.introduction
     data={}
     data['code']=1
@@ -270,7 +270,7 @@ def update():
     current_user.update_date = datetime.now()
     db.session.commit()
     flash('Your account has been updated!', 'success')
-    image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
+    image_file = url_for('pic', filename='profile_pics/' + current_user.image_file)
     return jsonify({'code': 1, 'message': 'Update success'})
 
 # @fishbookapi.route("/friend/add/<int:userid>", methods=['POST'])
@@ -441,7 +441,7 @@ def image_list():
     _pics=[]
     for pic in pics:
         _pic=pic.to_json()
-        _pic['image_file'] = url_for('static', filename='post_pics/' + _pic['image_file'])
+        _pic['image_file'] = url_for('pic', filename='post_pics/' + _pic['image_file'])
         del _pic['user_id']
         _pics.append(_pic)
     data={}
@@ -480,7 +480,7 @@ def identif(picture_fn):
     data={}
     data['code'] = 1
     fish = fish.to_json()
-    fish['image_file'] = url_for('static', filename='fish_pics/' + fish['image_file'])
+    fish['image_file'] = url_for('pic', filename='fish_pics/' + fish['image_file'])
     data['result_fish'] = fish
     return jsonify(data)
 
@@ -701,7 +701,7 @@ def myposts():
     for post in posts:
         _post=post.to_json()
         if post.image_file:
-            _post['image_file'] = url_for('static', filename='post_pics/' + post.image_file)
+            _post['image_file'] = url_for('pic', filename='post_pics/' + post.image_file)
         _posts.append(_post)
     data={}
     data['code'] = 1
@@ -717,13 +717,13 @@ def posts():
         for post in posts:
             _post=post.to_json()
             if post.image_file:
-                _post['image_file'] = url_for('static', filename='post_pics/' + post.image_file)
+                _post['image_file'] = url_for('pic', filename='post_pics/' + post.image_file)
             _posts.append(_post)
     posts = Post.query.filter_by(user_id = current_user.id).all()
     for post in posts:
         _post=post.to_json()
         if post.image_file:
-            _post['image_file'] = url_for('static', filename='post_pics/' + post.image_file)
+            _post['image_file'] = url_for('pic', filename='post_pics/' + post.image_file)
         _posts.append(_post)
     _posts.sort(key=lambda x: x['create_date'], reverse=True)
     data={}
@@ -744,7 +744,7 @@ def userposts(userid):
     for post in posts:
         _post=post.to_json()
         if post.image_file:
-            _post['image_file'] = url_for('static', filename='post_pics/' + post.image_file)
+            _post['image_file'] = url_for('pic', filename='post_pics/' + post.image_file)
         _posts.append(_post)
     data={}
     data['code'] = 1
@@ -758,7 +758,7 @@ def fishlist():
     _fish=[]
     for fish in fishs:
         fish =fish.to_json()
-        fish['image_file'] = url_for('static', filename='fish_pics/' + fish['image_file'])
+        fish['image_file'] = url_for('pic', filename='fish_pics/' + fish['image_file'])
         _fish.append(fish)
     data={}
     data['code'] = 1
@@ -770,7 +770,7 @@ def fishlist():
 def fish(fishid):
     fish = Fish.query.get_or_404(fishid)
     fish = fish.to_json()
-    fish['image_file'] = url_for('static', filename='fish_pics/' + fish['image_file'])
+    fish['image_file'] = url_for('pic', filename='fish_pics/' + fish['image_file'])
     return jsonify({'code': 1, 'fish': fish})
 
 
@@ -858,13 +858,6 @@ def deletenotice(noticeid):
     db.session.commit()
     return jsonify({'code': 1, 'message': 'Notice data has been deleted!'})
 
-@fishbookapi.route("/static/<string:folder>/<string:filename>", methods=['GET'])
-@login_required
-def static(folder,filename):
-    url=current_app.config['ROOT_FILE']+'static/'+folder+'/'+filename
-    if isinstance(url, six.binary_type):
-        url = url.decode('utf-8')
-    return redirect(url)
 
 test = Blueprint('test', __name__, url_prefix='/')
 
@@ -899,3 +892,11 @@ def up():
     image_url = upload_image_file(request.files.get('image'))
 
     return jsonify({'code': 1,'url': image_url })
+    
+@test.route("/pic/<string:folder>/<string:filename>", methods=['GET'])
+@login_required
+def static(folder,filename):
+    url=current_app.config['ROOT_FILE']+'static/'+folder+'/'+filename
+    if isinstance(url, six.binary_type):
+        url = url.decode('utf-8')
+    return redirect(url)

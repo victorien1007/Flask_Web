@@ -16,6 +16,9 @@ handlers:
 - url: /static/profile_pics
   static_dir: static/profile_pics
 
+- url: /images
+  static_dir: images
+
 - url: /.*
   script: main.app
 
