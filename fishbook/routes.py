@@ -11,9 +11,20 @@ from fishbook.models import User, Post, Comment, Pic, Fish, Notice, AlchemyEncod
 from flask_login import login_user, current_user, logout_user, login_required
 from fishbook.fish import fish_identification, load_image
 from fishbook import app
+from flask_cors import cross_origin
+
 basepath = os.path.dirname(__file__)
 fishbookapi = Blueprint('fishbook', __name__, url_prefix='/fishbook/api')
 
+"""
+@fishbookapi.after_request
+def af_request(resp):
+    resp = make_response(resp)
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    resp.headers['Access-Control-Allow-Methods'] = 'GET,POST'
+    resp.headers['Access-Control-Allow-Headers'] = 'x-requested-with,content-type'
+    return resp
+"""
 def url(string, filename):
     return current_app.config['ROOT_FILE']+string+'/'+filename
 
@@ -170,6 +181,7 @@ def login():
     user = User.query.filter_by(email=email).first()
     if user and bcrypt.check_password_hash(user.password, password):
         login_user(user, remember=remember)
+        #token = generate_token(username)
         return jsonify({'code': 1, 'message': 'Login successful.'})
     else:
         flash('Login Unsuccessful. Please check email and password', 'danger')

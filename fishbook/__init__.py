@@ -5,7 +5,8 @@ from flask_login import LoginManager
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, supports_credentials=True)
+app.config['CORS_HEADERS']='Content-Type'
 app.config['ROOT_FILE']='https://storage.googleapis.com/fishbook_pictures_storage/'
 app.config['PROJECT_ID']='ascendant-volt-229312'
 app.config['CLOUD_STORAGE_BUCKET']='fishbook_pictures_storage'
