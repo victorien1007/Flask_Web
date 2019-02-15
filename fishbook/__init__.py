@@ -2,8 +2,10 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 app.config['ROOT_FILE']='https://storage.googleapis.com/fishbook_pictures_storage/'
 app.config['PROJECT_ID']='ascendant-volt-229312'
 app.config['CLOUD_STORAGE_BUCKET']='fishbook_pictures_storage'
